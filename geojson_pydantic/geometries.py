@@ -27,7 +27,9 @@ def _position_list_wkt_coordinates(positions: List[Position]) -> str:
     return ", ".join(_position_wkt_coordinates(position) for position in positions)
 
 
-def _lines_wtk_coordinates(lines: List[List[Position]]) -> str:
+def _lines_wtk_coordinates(
+    lines: Union[List[LineStringCoords], List[LinearRing]]
+) -> str:
     """Converts lines to WKT Coordinates."""
     return ", ".join(f"({_position_list_wkt_coordinates(line)})" for line in lines)
 
@@ -149,14 +151,6 @@ class Polygon(_GeometryBase):
 
     type: Literal["Polygon"]
     coordinates: PolygonCoords
-
-    @validator("coordinates")
-    def check_closure(cls, coordinates: List) -> List:
-        """Validate that Polygon is closed (first and last coordinate are the same)."""
-        if any([ring[-1] != ring[0] for ring in coordinates]):
-            raise ValueError("All linear rings have the same start and end coordinates")
-
-        return coordinates
 
     @property
     def exterior(self) -> LinearRing:
